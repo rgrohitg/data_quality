@@ -13,16 +13,16 @@ class Settings(BaseSettings):
     config_path (str): The file path of the configuration file.
     """
 
-    soda_spec_dir: str = "/Users/rohit/projects/file_validator/data_quality_service/data"
+    soda_spec_dir: str = "./data"
     """The directory path where Soda spec files are located."""
 
     soda_check_template: str = "soda_check_{timestamp}.yml"
     """The template for creating Soda check files."""
 
-    data_file_path: str = "/Users/rohit/projects/file_validator/data_quality_service/data/data.csv"
+    data_file_path: str = "./data/data.csv"
     """The file path of the data file to be validated."""
 
-    config_path = "/Users/rohit/projects/file_validator/data_quality_service/data/conversion_config.json"
+    config_path = "./data/conversion_config.json"
     """The file path of the configuration file."""
 
 
