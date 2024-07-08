@@ -37,7 +37,7 @@ async def validate(request: DataValidationRequest):
         print(soda_check_path)
 
         # Validate the data file against the SodaCL checks
-        validation_results = validate_data(data_file_path, soda_check_path)
+        validation_results = validate_data(data_file_path, soda_check_path, spec_path)
 
         return {"status": "success", "results": validation_results}
     except Exception as e:
