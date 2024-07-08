@@ -29,12 +29,12 @@ def map_json_type_to_spark_type(column: dict):
 
 def create_schema_from_spec(spec: dict) -> StructType:
     columns = spec[0]["details"]["sheets"][0]["columns"]
-    fields = [StructField(col["source_col_name"], map_json_type_to_spark_type(col), True) for col in columns]
+    fields = [StructField(col["source_col_name"], map_json_type_to_spark_type(col), False) for col in columns]
     return StructType(fields)
 
 
 def read_csv_with_schema(spark: SparkSession, data_file_path: str, schema: StructType) -> DataFrame:
-    return spark.read.csv(data_file_path, schema=schema, sep=",", header=True)
+    return spark.read.csv(data_file_path, sep=",", header=True, mode="PERMISSIVE", columnNameOfCorruptRecord="_corrupt_record")
 
 
 def configure_and_execute_scan(spark: SparkSession, soda_check_path: str) -> dict:
@@ -69,11 +69,12 @@ def validate_data(data_file_path: str, soda_check_path: str, spec_file_path: str
     csv_file = read_csv_with_schema(spark, data_file_path, schema)
     csv_file.printSchema()
     csv_file.createOrReplaceTempView(spec[0]["details"]["sheets"][0]["table_name"])
-
+    csv_file.show()
     # Configure and execute Soda scan
     validation_results = configure_and_execute_scan(spark, soda_check_path)
 
     return validation_results
+
 
 
 # # Example usage
