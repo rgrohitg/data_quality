@@ -6,6 +6,17 @@ from app.models.models import ValidationResult
 
 
 def validate_data(data_file_path: str, soda_check_path: str, spec_file_path: str) -> ValidationResult:
+    """
+    Validates a CSV file against a Soda check using a given specification.
+
+    Parameters:
+    data_file_path (str): The path to the CSV file to be validated.
+    soda_check_path (str): The path to the Soda check configuration file.
+    spec_file_path (str): The path to the specification JSON file.
+
+    Returns:
+    ValidationResult: An instance containing the validation results.
+    """
     print("SODA_CHECK_PATH:", soda_check_path)
 
     # Load specification JSON

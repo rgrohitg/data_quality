@@ -6,6 +6,12 @@ thread_local = threading.local()
 
 
 def get_spark_session() -> SparkSession:
+    """
+    Get or create a SparkSession for the current thread.
+
+    Returns:
+    SparkSession: The SparkSession for the current thread.
+    """
     if not hasattr(thread_local, "spark"):
         thread_local.spark = (SparkSession.builder
                               .appName("SodaQualityChecks")
@@ -18,6 +24,9 @@ def get_spark_session() -> SparkSession:
 
 
 def stop_spark_session():
+    """
+    Stop the SparkSession for the current thread.
+    """
     if hasattr(thread_local, "spark"):
         thread_local.spark.stop()
         del thread_local.spark
