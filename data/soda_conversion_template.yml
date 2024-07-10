@@ -1,0 +1,15 @@
+- row_count > 0
+
+- missing_count({{ col }}) = 0:
+    name: No blank values in {{ col }}
+
+- schema:
+    name: Confirm that required columns are present
+    fail:
+      when required column missing: [{{ required_columns }}]
+
+- schema:
+    name: Confirm that datatypes are correct
+    fail:
+      when wrong column type:
+        {{ wrong_column_types }}
