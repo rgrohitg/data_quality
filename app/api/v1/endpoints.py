@@ -1,20 +1,13 @@
+# endpoint.py
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+
 from app.services.converter import convert_spec_to_soda_cl
 from app.services.validator import validate_data
-
-import os
-
-
-class DataValidationRequest(BaseModel):
-    spec_key: str
-    data_file: str
-
+from app.models.models import ValidationResult,DataValidationRequest
 
 router = APIRouter()
 
-
-@router.post("/validate")
+@router.post("/validate", response_model=ValidationResult)
 async def validate(request: DataValidationRequest):
     """
     Validates data against a given specification using SodaCL.
@@ -39,6 +32,6 @@ async def validate(request: DataValidationRequest):
         # Validate the data file against the SodaCL checks
         validation_results = validate_data(data_file_path, soda_check_path, spec_path)
 
-        return {"status": "success", "results": validation_results}
+        return validation_results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
