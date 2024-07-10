@@ -1,0 +1,340 @@
+{
+  "status": "success",
+  "results": {
+    "definitionName": "CSV_FILE_TEST",
+    "defaultDataSource": "spark_df",
+    "dataTimestamp": "2024-07-08T22:24:20+00:00",
+    "scanStartTimestamp": "2024-07-08T22:24:20+00:00",
+    "scanEndTimestamp": "2024-07-08T22:24:20+00:00",
+    "hasErrors": true,
+    "hasWarnings": false,
+    "hasFailures": false,
+    "metrics": [
+      {
+        "identity": "metric-CSV_FILE_TEST-spark_df-my_df-name",
+        "metricName": "name",
+        "value": null,
+        "dataSourceName": "spark_df"
+      }
+    ],
+    "checks": [],
+    "queries": [],
+    "automatedMonitoringChecks": [],
+    "profiling": [],
+    "metadata": [],
+    "logs": [
+      {
+        "level": "INFO",
+        "message": "Soda Core 3.3.10",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 1,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['R', 'o', 'w', ' ', 'c', 'o', 'u', 'n', 't', ' ', 'c', 'h', 'e', 'c', 'k'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 2,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Row count check\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 3,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 2,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 4,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 2,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['R', 'e', 'q', 'u', 'i', 'r', 'e', 'd', ' ', 'c', 'o', 'l', 'u', 'm', 'n', 's', ' ', 'p', 'r', 'e', 's', 'e', 'n', 't'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 5,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Required columns present\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 6,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 9,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 7,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 9,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['D', 'a', 't', 'a', ' ', 't', 'y', 'p', 'e', 's', ' ', 'f', 'o', 'r', ' ', 'C', 'o', 'l', '1', ' ', 'a', 'n', 'd', ' ', 'C', 'o', 'l', '2'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 8,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Data types for Col1 and Col2\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 9,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 16,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 10,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 16,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['N', 'o', ' ', 'n', 'u', 'l', 'l', ' ', 'v', 'a', 'l', 'u', 'e', 's', ' ', 'i', 'n', ' ', 'C', 'o', 'l', '1', ' ', 'a', 'n', 'd', ' ', 'C', 'o', 'l', '2'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 11,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"No null values in Col1 and Col2\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 12,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 30,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 13,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 30,
+          "col": 5
+        }
+      },
+      {
+        "level": "DEBUG",
+        "message": "Scan execution starts",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 14,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Error occurred while executing scan.",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 15,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "INFO",
+        "message": "Soda Core 3.3.10",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 16,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "DEBUG",
+        "message": "Reading SodaCL file \"./data/soda_check.yml\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 17,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['R', 'o', 'w', ' ', 'c', 'o', 'u', 'n', 't', ' ', 'c', 'h', 'e', 'c', 'k'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 18,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Row count check\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 19,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 2,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 20,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 2,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['R', 'e', 'q', 'u', 'i', 'r', 'e', 'd', ' ', 'c', 'o', 'l', 'u', 'm', 'n', 's', ' ', 'p', 'r', 'e', 's', 'e', 'n', 't'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 21,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Required columns present\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 22,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 9,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 23,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 9,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['D', 'a', 't', 'a', ' ', 't', 'y', 'p', 'e', 's', ' ', 'f', 'o', 'r', ' ', 'C', 'o', 'l', '1', ' ', 'a', 'n', 'd', ' ', 'C', 'o', 'l', '2'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 24,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"Data types for Col1 and Col2\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 25,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 16,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 26,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 16,
+          "col": 5
+        }
+      },
+      {
+        "level": "INFO",
+        "message": "Check 'name' contains same-level configuration keys ['N', 'o', ' ', 'n', 'u', 'l', 'l', ' ', 'v', 'a', 'l', 'u', 'e', 's', ' ', 'i', 'n', ' ', 'C', 'o', 'l', '1', ' ', 'a', 'n', 'd', ' ', 'C', 'o', 'l', '2'] that will be ignored. Is your indentation correct?",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 27,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Check configuration details should be object/dict, but was DoubleQuotedScalarString: \n\"No null values in Col1 and Col2\"\n",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 28,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 30,
+          "col": 5
+        }
+      },
+      {
+        "level": "ERROR",
+        "message": "No threshold specified for check \"name\"",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 29,
+        "doc": null,
+        "location": {
+          "filePath": "./data/soda_check.yml",
+          "line": 30,
+          "col": 5
+        }
+      },
+      {
+        "level": "DEBUG",
+        "message": "Scan execution starts",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 30,
+        "doc": null,
+        "location": null
+      },
+      {
+        "level": "ERROR",
+        "message": "Error occurred while executing scan.",
+        "timestamp": "2024-07-08T22:24:20+00:00",
+        "index": 31,
+        "doc": null,
+        "location": null
+      }
+    ]
+  }
+}
