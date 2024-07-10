@@ -1,5 +1,5 @@
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     data_file_path: str = "./data/data.csv"
     """The file path of the data file to be validated."""
 
-    config_path = "./data/conversion_config.json"
+    config_path: str = "./data/conversion_config.json"
     """The file path of the configuration file."""
 
 
