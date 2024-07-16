@@ -3,7 +3,8 @@ import os
 from datetime import datetime
 from typing import List, Dict
 from jinja2 import Template
-
+import logging  # Import logging module
+from app.logger_config import logger  # Import logger instance from logger_config.py
 from app.core.config import settings
 
 
@@ -12,32 +13,68 @@ def load_template(template_path: str) -> str:
         return template_file.read()
 
 
-def convert_spec_to_soda_cl(spec_path: str, template_path: str) -> str:
+def convert_spec_to_soda_cl(sheet: Dict, template_path: str) -> str:
     """
-    Converts a specification file in JSON format to a SodaCL file.
+    Converts a sheet specification to a SodaCL file.
 
     Parameters:
-    spec_path (str): The path to the JSON specification file.
+    sheet (Dict): The sheet specification as a dictionary.
     template_path (str): The path to the SodaCL template file.
 
     Returns:
     str: The path to the generated SodaCL file.
     """
-    with open(spec_path, 'r') as spec_file:
-        spec_data = json.load(spec_file)
 
+    logger.info(f"Converting sheet to SodaCL file: {sheet}")
     template_content = load_template(template_path)
-    soda_cl_content = convert_to_soda_cl(spec_data, template_content)
-
+    soda_cl_content = convert_to_soda_cl(sheet, template_content)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    soda_check_path = os.path.join(settings.soda_spec_dir, settings.soda_check_template.format(timestamp=timestamp))
-
-    print("converted soda cl content:", soda_cl_content)
+    sheet_name = sheet.get('sheet_name', 'default')
+    soda_check_path = os.path.join(settings.soda_spec_dir,
+                                   settings.soda_check_template.format(sheet_name=sheet_name, timestamp=timestamp))
 
     with open(soda_check_path, 'w') as soda_file:
         soda_file.write(soda_cl_content)
 
+    logger.info(f"SodaCL file generated at: {soda_check_path}")
+
     return soda_check_path
+
+
+def convert_to_soda_cl(sheet: Dict, template_content: str) -> str:
+    """
+    Converts a sheet specification to SodaCL file content.
+
+    Parameters:
+    sheet (Dict): The sheet specification as a dictionary.
+    template_content (str): The content of the SodaCL template.
+
+    Returns:
+    str: The content of the generated SodaCL file.
+    """
+
+    logger.debug("Inside convert_to_soda_cl method start")
+    soda_cl_content = f"checks for {sheet.get('table_name', 'default')}:\n"
+    logger.debug(f"SodaCL content header: {soda_cl_content}")
+
+    # Split template content into different sections
+    template_parts = template_content.split("\n\n")
+    default_checks_template = template_parts[0]
+    missing_count_checks_template = template_parts[1]
+    schema_checks_template = template_parts[2]
+
+    # Add default checks
+    soda_cl_content += generate_default_checks(default_checks_template)
+
+    # Add missing count checks for required columns
+    soda_cl_content += generate_missing_count_checks(sheet['columns'], missing_count_checks_template)
+
+    # Add schema checks
+    soda_cl_content += generate_schema_checks(sheet['columns'], schema_checks_template)
+
+    logger.debug("*********************END********************")
+
+    return soda_cl_content.strip()  # Remove the trailing newline
 
 
 def map_json_type_to_soda_type(json_type: str) -> str:
@@ -83,7 +120,10 @@ def generate_missing_count_checks(columns: List[Dict], template_content: str) ->
     for column in columns:
         if column.get("is_required") == "Y":
             col_name = column['source_col_name']
-            missing_count_checks += template.render(col=col_name) + "\n"
+            rendered_template = template.render(col=col_name)
+            missing_count_checks += rendered_template + "\n"
+            logger.debug(f"Generated missing count check: {rendered_template.strip()}")
+
     return missing_count_checks
 
 
@@ -104,51 +144,24 @@ def generate_schema_checks(columns: List[Dict], template_content: str) -> str:
     wrong_column_types = "\n".join(
         [f"          {col['source_col_name']}: {map_json_type_to_soda_type(col['source_col_type'])}" for col in columns]
     )
-    return template.render(required_columns=", ".join(required_columns), wrong_column_types=wrong_column_types) + "\n"
+    rendered_template = template.render(required_columns=", ".join(required_columns), wrong_column_types=wrong_column_types)
+    logger.debug(f"Generated schema checks:\n{rendered_template.strip()}")
 
-
-def convert_to_soda_cl(spec_data: List[Dict], template_content: str) -> str:
-    """
-    Converts a list of specifications in JSON format to a SodaCL file content.
-
-    Parameters:
-    spec_data (List[Dict]): A list of dictionaries, where each dictionary represents a specification.
-        Each specification should contain a 'details' key with a 'sheets' key, which is a list of sheets.
-        Each sheet should contain 'columns' key, which is a list of dictionaries representing columns.
-    template_content (str): The content of the SodaCL template, which contains placeholders for different checks.
-
-    Returns:
-    str: The content of the generated SodaCL file, containing checks for each sheet in the specifications.
-    """
-    soda_cl_content = ""
-
-    for spec in spec_data:
-        for sheet in spec["details"]["sheets"]:
-            table_name = sheet.get('table_name', 'default')
-            soda_cl_content += f"checks for {table_name}:\n"
-
-            # Split template content into different sections
-            template_parts = template_content.split("\n\n")
-            default_checks_template = template_parts[0]
-            missing_count_checks_template = template_parts[1]
-            schema_checks_template = template_parts[2]
-
-            # Add default checks
-            soda_cl_content += generate_default_checks(default_checks_template)
-
-            # Add missing count checks for required columns
-            soda_cl_content += generate_missing_count_checks(sheet['columns'], missing_count_checks_template)
-
-            # Add schema checks
-            soda_cl_content += generate_schema_checks(sheet['columns'], schema_checks_template)
-
-            soda_cl_content += "\n"
-
-    return soda_cl_content.strip()  # Remove the trailing newline
+    return rendered_template + "\n"
 
 #
 # # Example usage
 # if __name__ == "__main__":
 #     spec_path = "path/to/your/specification.json"
 #     template_path = "path/to/your/soda_checks_template.yml"
-#     convert_spec_to_soda_cl(spec_path, template_path)
+#     logger.info(f"Starting conversion for spec: {spec_path} with template: {template_path}")
+#     sheet_spec = {
+#         "sheet_name": "example_sheet",
+#         "table_name": "example_table",
+#         "columns": [
+#             {"source_col_name": "col1", "is_required": "Y", "source_col_type": "text"},
+#             {"source_col_name": "col2", "is_required": "N", "source_col_type": "integer"},
+#             # Add more columns as needed
+#         ]
+#     }
+#     convert_spec_to_soda_cl(sheet_spec, template_path)

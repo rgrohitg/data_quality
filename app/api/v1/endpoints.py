@@ -1,38 +1,29 @@
-# endpoint.py
 from fastapi import APIRouter, HTTPException
-
-from app.services.converter import convert_spec_to_soda_cl
-from app.services.validator import validate_data
+from app.services.file_validator_factory import FileValidatorFactory
 from app.models.models import ValidationResult, DataValidationRequest
 
 router = APIRouter()
 
 
 @router.post("/validate", response_model=ValidationResult)
-async def validate(request: DataValidationRequest):
-    """
-    Validates data against a given specification using SodaCL.
-
-    Parameters:
-    request (DataValidationRequest): The request object containing the specification key and data file path.
-
-    Returns:
-    dict: A dictionary containing the status and validation results.
-
-    Raises:
-    HTTPException: If an error occurs during the validation process.
-    """
+def validate_data(request: DataValidationRequest) -> ValidationResult:
     try:
-        spec_path = request.spec_key  # For phase 1, assume this is a local path
-        data_file_path = request.data_file  # For phase 1, assume this is a local path
+        validator = FileValidatorFactory.get_validator(request.file_type)
+        validation_result = validator.validate(request.data_file_path, request.spec_file_path)
+        return validation_result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-        # Convert specification to SodaCL check YAML
-        soda_check_path = convert_spec_to_soda_cl(spec_path, "./data/soda_conversion_template.yml")
-        print(soda_check_path)
 
-        # Validate the data file against the SodaCL checks
-        validation_results = validate_data(data_file_path, soda_check_path, spec_path)
 
-        return validation_results
+@router.post("/process-file", response_model=ValidationResult)
+def process_file(request: S3FileRequest) -> ValidationResult:
+    try:
+        validation_result = file_processor.process_file(request.dynamoDbKey, request.s3TempKey)
+        return validation_result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

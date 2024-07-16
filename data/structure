@@ -4,10 +4,30 @@ app
 │       └── endpoint.py
 ├── core
 │   └── config.py
+    └── spark_session.py
+
 ├── services
 │   ├── converter.py
-│   ├── file_handler.py
+│   ├── file_validator.py
+│   ├── file_validator_factory.py
+│   ├── csv_validator.py
+│   ├── excel_validator.py
 │   ├── soda_scan.py
-│   ├── shutdown.py
-│   └── validator.py
+│
+├── config
+│   ├── config.py
+├── utils
+│   ├── validator_utils.py
+├── models
+│   ├── models.py
+│
 └── main.py
+│
+└── logger_config.py
+│
+└── data
+   ├── specification_csv.json
+   ├── specification_xlsx.json
+   ├── data.csv
+   ├── data.xlsx
+   ├── soda_conversion_template.yml

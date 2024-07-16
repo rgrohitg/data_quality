@@ -1,7 +1,7 @@
 fastapi
 pydantic
-soda-core==3.3.9
-soda-core-contracts==3.3.9
+soda-core
+soda-core-contracts
 soda-core-spark-df
 uvicorn
 pandas

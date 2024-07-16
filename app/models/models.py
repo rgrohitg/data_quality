@@ -4,8 +4,9 @@ from typing import Dict
 
 
 class DataValidationRequest(BaseModel):
-    spec_key: str
-    data_file: str
+    spec_file_path: str
+    data_file_path: str
+    file_type: str
 
 
 class ValidationResult(BaseModel):
@@ -13,4 +14,3 @@ class ValidationResult(BaseModel):
     file_details: Dict[str, str]
     errors: Dict
     success: Dict
-    soda_scan_results: Dict

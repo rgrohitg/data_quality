@@ -6,6 +6,8 @@ from soda.common.logs import configure_logging
 from soda.sampler.sampler import Sampler
 from soda.sampler.sample_context import SampleContext
 
+from app.models.models import ValidationResult
+
 
 class CustomSampler(Sampler):
     """
@@ -40,14 +42,24 @@ class CustomSampler(Sampler):
         print("FAILED ROWS:{rows}", rows)
         if rows:
             self.errors[sample_context.check_name] = {
-                "schema": sample_context.sample.get_schema(),
-                "rows": rows
+                "Failed Rows": rows
             }
         else:
             self.success[sample_context.query] = "Passed"
 
+    def get_validation_result(self, spec_file_path: str, data_file_path: str) -> ValidationResult:
+        return ValidationResult(
+            is_valid_file=not bool(self.errors),  # If there are errors, the file is not valid
+            file_details={
+                "spec_key": spec_file_path,
+                "data_file": data_file_path,
+            },
+            errors=self.errors,
+            success=self.success
+        )
 
-def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom_sampler: CustomSampler) -> dict:
+
+def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom_sampler: CustomSampler, spec_file_path: str, data_file_path: str) -> ValidationResult:
     """
     Configures and executes a Soda scan using the provided Spark session, Soda check path, and custom sampler.
 
@@ -69,5 +81,5 @@ def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom
 
     scan.set_verbose(True)
     scan.execute()
-    print("SCAN RESULTS :", scan.scan_results)
-    return scan.get_scan_results()
+
+    return custom_sampler.get_validation_result(spec_file_path, data_file_path)
