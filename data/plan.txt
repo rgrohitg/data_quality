@@ -1,0 +1,238 @@
+app
+├── api
+│   └── v1
+│       └── endpoints.py
+├── core
+│   ├── config.py
+│   ├── spark_session.py
+│   └── aws_client.py
+├── services
+│   ├── converter.py
+│   ├── file_validator.py
+│   ├── file_validator_factory.py
+│   ├── csv_validator.py
+│   ├── excel_validator.py
+│   ├── soda_scan.py
+│   └── file_processor.py
+├── config
+│   ├── config.py
+├── utils
+│   ├── validator_utils.py
+│   └── sqs_listener.py
+├── models
+│   ├── models.py
+│   └── requests.py
+├── main.py
+├── logger_config.py
+└── data
+    ├── specification_csv.json
+    ├── specification_xlsx.json
+    ├── data.csv
+    ├── data.xlsx
+    ├── soda_conversion_template.yml
+
+
+DynamoDB Table Structure
+Table: ValidationRuns
+Primary Key: run_id (String) - A unique identifier for each validation run.
+Sort Key: job_id (String) - Identifier for each job within a run.
+Attributes:
+tenant_key (String) - Tenant identifier.
+status (String) - Status of the validation (e.g., PENDING, IN_PROGRESS, COMPLETED, FAILED).
+start_time (String) - Timestamp when the validation started.
+end_time (String) - Timestamp when the validation ended.
+soda_cl_check_info (String) - Information about the converted SodaCL checks.
+validation_result (String) - Result of the validation (e.g., Pass/Fail with detailed info).
+last_processed_step (String) - Last processed step in case of interruption.
+created_by (String) - User who initiated the validation.
+Table: ValidationResults
+Primary Key: result_id (String) - A unique identifier for each validation result.
+Attributes:
+run_id (String) - Run identifier to link back to ValidationRuns table.
+errors (Map) - Errors encountered during validation.
+success (Map) - Successful checks during validation
+
+
+Step 1: Define Models for DynamoDB
+# models/dynamodb_models.py
+from pydantic import BaseModel
+from typing import Dict, Optional
+
+class ValidationRun(BaseModel):
+    run_id: str
+    job_id: str
+    tenant_key: str
+    status: str
+    start_time: str
+    end_time: Optional[str] = None
+    soda_cl_check_info: Optional[str] = None
+    validation_result: Optional[str] = None
+    last_processed_step: Optional[str] = None
+    created_by: str
+
+class ValidationResult(BaseModel):
+    result_id: str
+    run_id: str
+    errors: Optional[Dict] = None
+    success: Optional[Dict] = None
+
+Step 2: DynamoDB Client
+# services/dynamodb_client.py
+import boto3
+from botocore.exceptions import ClientError
+from app.models.dynamodb_models import ValidationRun, ValidationResult
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DynamoDBClient:
+    def __init__(self):
+        self.dynamodb = boto3.resource('dynamodb')
+        self.validation_runs_table = self.dynamodb.Table('ValidationRuns')
+        self.validation_results_table = self.dynamodb.Table('ValidationResults')
+
+    def create_validation_run(self, run: ValidationRun):
+        try:
+            self.validation_runs_table.put_item(Item=run.dict())
+        except ClientError as e:
+            logger.error(f"Unable to create validation run: {e}")
+            raise
+
+    def update_validation_run(self, run_id: str, updates: Dict):
+        try:
+            update_expression = "SET " + ", ".join(f"{k}=:{k}" for k in updates.keys())
+            expression_values = {f":{k}": v for k, v in updates.items()}
+            self.validation_runs_table.update_item(
+                Key={'run_id': run_id},
+                UpdateExpression=update_expression,
+                ExpressionAttributeValues=expression_values
+            )
+        except ClientError as e:
+            logger.error(f"Unable to update validation run: {e}")
+            raise
+
+    def create_validation_result(self, result: ValidationResult):
+        try:
+            self.validation_results_table.put_item(Item=result.dict())
+        except ClientError as e:
+            logger.error(f"Unable to create validation result: {e}")
+            raise
+
+
+Step 3: Validation Service
+# services/validation_service.py
+from app.services.dynamodb_client import DynamoDBClient
+from app.models.dynamodb_models import ValidationRun, ValidationResult
+from app.core.spark_session import SparkSessionFactory
+from app.services.file_validator_factory import FileValidatorFactory
+from app.models.models import ValidationResult as ValidationResultModel
+from app.soda_scan import configure_and_execute_scan
+from datetime import datetime
+import uuid
+
+class ValidationService:
+    def __init__(self):
+        self.dynamodb_client = DynamoDBClient()
+
+    def start_validation(self, request_data):
+        run_id = str(uuid.uuid4())
+        job_id = request_data['fileId']
+        run = ValidationRun(
+            run_id=run_id,
+            job_id=job_id,
+            tenant_key=request_data['tenantKey'],
+            status="PENDING",
+            start_time=datetime.utcnow().isoformat(),
+            created_by=request_data['user']
+        )
+        self.dynamodb_client.create_validation_run(run)
+
+        # Fetch specification and file paths (mocked for this example)
+        spec_file_path = self.fetch_spec_file_from_dynamodb(request_data['dynamoDbKey'])
+        data_file_path = self.fetch_file_from_s3(request_data['s3TempKey'])
+
+        # Update run status to IN_PROGRESS
+        self.dynamodb_client.update_validation_run(run_id, {'status': 'IN_PROGRESS'})
+
+        # Perform validation
+        validator = FileValidatorFactory.get_validator(request_data['fileName'].split('.')[-1])
+        validation_result: ValidationResultModel = validator.validate(data_file_path, spec_file_path)
+
+        # Update validation run with results
+        result = ValidationResult(
+            result_id=str(uuid.uuid4()),
+            run_id=run_id,
+            errors=validation_result.errors,
+            success=validation_result.success
+        )
+        self.dynamodb_client.create_validation_result(result)
+
+        # Finalize the validation run
+        updates = {
+            'status': 'COMPLETED' if validation_result.is_valid_file else 'FAILED',
+            'end_time': datetime.utcnow().isoformat(),
+            'validation_result': 'Pass' if validation_result.is_valid_file else 'Fail',
+            'last_processed_step': 'ValidationCompleted'
+        }
+        self.dynamodb_client.update_validation_run(run_id, updates)
+
+    def fetch_spec_file_from_dynamodb(self, dynamoDbKey: str) -> str:
+        # Mocked response
+        return './data/specification_csv.json'
+
+    def fetch_file_from_s3(self, s3TempKey: str) -> str:
+        # Mocked response
+        return './data/data.csv'
+
+
+Step 4: SQS Listener and API Endpoint
+# main.py (continuation)
+import uvicorn
+from fastapi import FastAPI, BackgroundTasks
+from app.services.validation_service import ValidationService
+
+app = FastAPI()
+validation_service = ValidationService()
+
+@app.post("/validate")
+async def validate_data(request_data: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(validation_service.start_validation, request_data)
+    return {"message": "Validation started", "run_id": str(uuid.uuid4())}
+
+# SQS Listener
+import boto3
+
+def listen_to_sqs():
+    sqs = boto3.client('sqs')
+    queue_url = 'YOUR_SQS_QUEUE_URL'
+
+    while True:
+        response = sqs.receive_message(
+            QueueUrl=queue_url,
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=20,
+        )
+
+        messages = response.get('Messages', [])
+        for message in messages:
+            request_data = json.loads(message['Body'])
+            validation_service.start_validation(request_data)
+            sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=message['ReceiptHandle']
+            )
+
+if __name__ == '__main__':
+    import threading
+    sqs_thread = threading.Thread(target=listen_to_sqs, daemon=True)
+    sqs_thread.start()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+Explanation
+Models: Defined Pydantic models for ValidationRun and ValidationResult.
+DynamoDB Client: Handles interactions with DynamoDB, including creating and updating validation runs and results.
+Validation Service: Orchestrates the validation process, including fetching specification files, performing validation, and updating DynamoDB with results.
+API Endpoint: Provides a manual way to start validation via FastAPI.
+SQS Listener: Listens to SQS messages and triggers the validation process.
+
+
