@@ -1,0 +1,66 @@
+class CustomSampler(Sampler):
+   
+    def __init__(self):
+        self.errors: dict = {}
+        self.success: dict = {}
+
+    def store_sample(self, sample_context: SampleContext):
+        rows = sample_context.sample.get_rows()
+        print("FAILED ROWS:", rows)
+        
+        if rows:
+            failed_rows_with_details = {
+                "Failed Rows": [
+                    {
+                        "row_index": row.index,
+                        "row_data": row.data,
+                        "failed_columns": {
+                            col_name: row.data[col_idx]
+                            for col_idx, col_name in enumerate(row.columns)
+                            if row.data[col_idx] is None or row.data[col_idx] == ""
+                        }
+                    }
+                    for row in rows
+                ]
+            }
+            self.errors[sample_context.check_name] = failed_rows_with_details
+        else:
+            self.success[sample_context.check_name] = "Passed"
+
+    def get_validation_result(self, spec_file_path: str, data_file_path: str) -> ValidationResult:
+        return ValidationResult(
+            is_valid_file=not bool(self.errors),  # If there are errors, the file is not valid
+            file_details={
+                "spec_key": spec_file_path,
+                "data_file": data_file_path,
+            },
+            errors=self.errors,
+            success=self.success
+        )
+
+# Assuming row data is a namedtuple or similar structure with 'index', 'data', and 'columns' attributes
+class SampleContext:
+    def __init__(self, check_name, sample):
+        self.check_name = check_name
+        self.sample = sample
+
+class ValidationResult:
+    def __init__(self, is_valid_file, file_details, errors, success):
+        self.is_valid_file = is_valid_file
+        self.file_details = file_details
+        self.errors = errors
+        self.success = success
+
+# Example usage
+# Assume 'sample_context' is provided by the Soda Scan framework with the relevant data
+sample_context = SampleContext(
+    check_name="Null Check",
+    sample=Sample([Row(index=4, data=["", "dsf"], columns=["Col1", "Col2"]),
+                   Row(index=6, data=["vaasd", ""], columns=["Col1", "Col2"]),
+                   Row(index=7, data=["value5", ""], columns=["Col1", "Col2"])])
+)
+
+sampler = CustomSampler()
+sampler.store_sample(sample_context)
+validation_result = sampler.get_validation_result("spec_file_path", "data_file_path")
+print(validation_result.errors)
