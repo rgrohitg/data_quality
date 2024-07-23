@@ -30,44 +30,28 @@ SODA_TO_PYSPARK_TYPE_MAP = {
 class CustomSampler(Sampler):
     def __init__(self, spark: SparkSession):
         super().__init__()
-        self.errors: dict = {}
-        self.success: dict = {}
         self._spark = spark
+        self.retrieved_df = None
 
     def store_sample(self, sample_context: SampleContext):
         rows = sample_context.sample.get_rows()
         if rows:
             schema = T.StructType(
-                #[
-                #    T.StructField(name="ROW", dataType=T.IntegerType())
-               # ] +
-                  [ T.StructField(name=col.name, dataType=SODA_TO_PYSPARK_TYPE_MAP[col.type])
-                    for col in sample_context.sample.get_schema().columns
-                ]
+                [ T.StructField(name=col.name, dataType=SODA_TO_PYSPARK_TYPE_MAP[col.type])
+                  for col in sample_context.sample.get_schema().columns
+                  ]
             )
 
-            # Ensure each row has an index
-            #rows_with_index = [(i+1,) + tuple(row) for i, row in enumerate(rows)]
-            retrieved_df = self._spark.createDataFrame(rows, schema)
-            retrieved_df.show()
-            self.errors[sample_context.check_name] = {
-                "Columns:": sample_context.sample.get_schema().columns, "Rows": rows
-            }
+            # Create DataFrame
+            self.retrieved_df = self._spark.createDataFrame(rows, schema)
+            self.retrieved_df.show(truncate=False)  # Display DataFrame for debugging
         else:
-            self.success[sample_context.query] = "Passed"
+            logger.info("No rows found in the sample.")
 
-    def get_validation_result(self, spec_file_path: str, data_file_path: str) -> ValidationResult:
-        return ValidationResult(
-            is_valid_file=not bool(self.errors),  # If there are errors, the file is not valid
-            file_details={
-                "spec_key": spec_file_path,
-                "data_file": data_file_path,
-            },
-            errors=self.errors,
-            success=self.success
-        )
+    def get_retrieved_df(self):
+        return self.retrieved_df
 
-def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom_sampler: CustomSampler, spec_file_path: str, data_file_path: str) -> ValidationResult:
+def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom_sampler: CustomSampler, spec_file_path: str, data_file_path: str):
     configure_logging()
     scan = Scan()
     scan.sampler = custom_sampler
@@ -79,4 +63,5 @@ def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom
     scan.set_verbose(True)
     scan.execute()
 
-    return custom_sampler.get_validation_result(spec_file_path, data_file_path)
+    # Retrieve and return the DataFrame
+    return custom_sampler.get_retrieved_df()

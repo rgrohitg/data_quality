@@ -25,9 +25,9 @@ class DataValidator:
             logger.debug(f"Specification loaded: {spec}")
             return spec
 
-    def execute_validation(self, read_func) -> ValidationResult:
+    def execute_validation(self, read_func) -> DataFrame:
         spec = self.load_specification()
-        validation_results = {}
+        data_frames = {}
         for sheet in spec[0]["details"]["sheets"]:
             logger.info(f"Processing sheet: {sheet['sheet_name']}")
             data_file = read_func(self.spark, self.data_file_path, sheet['sheet_name'])
@@ -36,20 +36,10 @@ class DataValidator:
             soda_check_path = convert_spec_to_soda_cl(sheet, "./data/soda_conversion_template.yml")
             custom_sampler = CustomSampler(self.spark)
             logger.debug(f"soda_check_path: {soda_check_path}")
-            validation_results[sheet['sheet_name']] = configure_and_execute_scan(
+            data_frames[sheet['sheet_name']] = configure_and_execute_scan(
                 self.spark, soda_check_path, custom_sampler, self.spec_file_path, self.data_file_path
             )
 
         SparkSessionFactory.stop_spark_session()  # Ensure the Spark session is stopped after use
-        is_valid_file = all(res.is_valid_file for res in validation_results.values())
-        validation_result = ValidationResult(
-            is_valid_file=is_valid_file,
-            file_details={
-                "spec_key": self.spec_file_path,
-                "data_file": self.data_file_path,
-            },
-            errors={sheet: res.errors for sheet, res in validation_results.items()},
-            success={sheet: res.success for sheet, res in validation_results.items()}
-        )
-        logger.info(f"Validation result: {validation_result}")
-        return validation_result
+        logger.info(f"DataFrames retrieved: {data_frames}")
+        return data_frames

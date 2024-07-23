@@ -10,7 +10,7 @@ from app.utils.validation_utils import DataValidator
 from app.logger_config import logger
 
 class CSVValidator(FileValidator):
-    def validate(self, request: S3FileRequest) -> ValidationResult:
+    def validate(self, request: S3FileRequest) -> dict:
         logger.info(f"Starting CSV validation for data file {request.s3TempKey} with specification {request.specKey}")
         validator = DataValidator(request.specKey, request.s3TempKey)
         return validator.execute_validation(self.read_csv_with_schema)
@@ -22,3 +22,4 @@ class CSVValidator(FileValidator):
         df_with_index = df.withColumn("ROW", monotonically_increasing_id() + 1)
         df_with_index.show()
         return df_with_index
+
