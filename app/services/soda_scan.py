@@ -1,48 +1,57 @@
-from typing import Dict
-
+import json
+import logging
 from pyspark.sql import SparkSession
+from pyspark.sql import types as T
+from pyspark.sql.functions import lit, monotonically_increasing_id
 from soda.scan import Scan
 from soda.common.logs import configure_logging
 from soda.sampler.sampler import Sampler
 from soda.sampler.sample_context import SampleContext
-
 from app.models.models import ValidationResult
+from app.logger_config import logger
 
+# Create a mapping from Soda schema types to PySpark SQL types
+SODA_TO_PYSPARK_TYPE_MAP = {
+    'string': T.StringType(),
+    'integer': T.IntegerType(),
+    'long': T.LongType(),
+    'float': T.FloatType(),
+    'double': T.DoubleType(),
+    'boolean': T.BooleanType(),
+    'StringType': T.StringType(),
+    'IntegerType': T.IntegerType(),
+    'LongType': T.LongType(),
+    'FloatType': T.FloatType(),
+    'DoubleType': T.DoubleType(),
+    'BooleanType': T.BooleanType(),
+    # Add more types as needed
+}
 
 class CustomSampler(Sampler):
-    """
-    CustomSampler is a class that implements the Sampler interface to store samples of data during a Soda scan.
-
-    Attributes:
-    - errors: A dictionary to store failed rows for each check.
-    - success: A dictionary to store successful queries.
-
-    Methods:
-    - store_sample: Stores a sample of data based on the given SampleContext.
-    """
-
-    def __init__(self):
-        """
-        Initializes the CustomSampler with empty errors and success dictionaries.
-        """
+    def __init__(self, spark: SparkSession):
+        super().__init__()
         self.errors: dict = {}
         self.success: dict = {}
+        self._spark = spark
 
     def store_sample(self, sample_context: SampleContext):
-        """
-        Stores a sample of data based on the given SampleContext.
-
-        Parameters:
-        - sample_context (SampleContext): The context of the sample, including the check name, sample data, and query.
-
-        Returns:
-        - None
-        """
         rows = sample_context.sample.get_rows()
-        print("FAILED ROWS:{rows}", rows)
         if rows:
+            schema = T.StructType(
+                #[
+                #    T.StructField(name="ROW", dataType=T.IntegerType())
+               # ] +
+                  [ T.StructField(name=col.name, dataType=SODA_TO_PYSPARK_TYPE_MAP[col.type])
+                    for col in sample_context.sample.get_schema().columns
+                ]
+            )
+
+            # Ensure each row has an index
+            #rows_with_index = [(i+1,) + tuple(row) for i, row in enumerate(rows)]
+            retrieved_df = self._spark.createDataFrame(rows, schema)
+            retrieved_df.show()
             self.errors[sample_context.check_name] = {
-                "Failed Rows": rows
+                "Columns:": sample_context.sample.get_schema().columns, "Rows": rows
             }
         else:
             self.success[sample_context.query] = "Passed"
@@ -58,19 +67,7 @@ class CustomSampler(Sampler):
             success=self.success
         )
 
-
 def configure_and_execute_scan(spark: SparkSession, soda_check_path: str, custom_sampler: CustomSampler, spec_file_path: str, data_file_path: str) -> ValidationResult:
-    """
-    Configures and executes a Soda scan using the provided Spark session, Soda check path, and custom sampler.
-
-    Parameters:
-    - spark (SparkSession): The Spark session to be used for the scan.
-    - soda_check_path (str): The path to the Soda check YAML file.
-    - custom_sampler (CustomSampler): An instance of the custom sampler class to store samples of data during the scan.
-
-    Returns:
-    - dict: A dictionary containing the scan results.
-    """
     configure_logging()
     scan = Scan()
     scan.sampler = custom_sampler
