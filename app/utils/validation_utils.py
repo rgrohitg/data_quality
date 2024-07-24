@@ -5,7 +5,7 @@ from pyspark.sql.functions import monotonically_increasing_id
 from pyspark.sql import DataFrame
 from app.core.spark_session import SparkSessionFactory
 from app.services.converter import convert_spec_to_soda_cl
-from app.services.soda_scan import configure_and_execute_scan, CustomSampler
+from app.services.soda_scan import configure_and_execute_scan, CustomSampler, format_response
 from app.models.models import ValidationResult
 from app.logger_config import logger
 
@@ -25,7 +25,7 @@ class DataValidator:
             logger.debug(f"Specification loaded: {spec}")
             return spec
 
-    def execute_validation(self, read_func) -> DataFrame:
+    def execute_validation(self, read_func) -> dict:
         spec = self.load_specification()
         data_frames = {}
         for sheet in spec[0]["details"]["sheets"]:
@@ -36,10 +36,25 @@ class DataValidator:
             soda_check_path = convert_spec_to_soda_cl(sheet, "./data/soda_conversion_template.yml")
             custom_sampler = CustomSampler(self.spark)
             logger.debug(f"soda_check_path: {soda_check_path}")
-            data_frames[sheet['sheet_name']] = configure_and_execute_scan(
+
+            scan_results = configure_and_execute_scan(
                 self.spark, soda_check_path, custom_sampler, self.spec_file_path, self.data_file_path
             )
+            logger.debug(f"Scan results: {scan_results}")
+
+            formatted_response = format_response(
+                scan_results["scan_results"],
+                scan_results["failed_rows"],
+                dynamoDbKey="DNAMODBKEY",
+                templateName="TEMPLATE NAME",
+                fileName=self.data_file_path
+            )
+            logger.info(f"Formatted response: {formatted_response}")
+
+            data_frames[sheet['sheet_name']] = formatted_response
 
         SparkSessionFactory.stop_spark_session()  # Ensure the Spark session is stopped after use
-        logger.info(f"DataFrames retrieved: {data_frames}")
+        logger.info(f"Validation results: {data_frames}")
         return data_frames
+
+
