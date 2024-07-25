@@ -10,7 +10,20 @@ In addition to these features, Cube Cloud also offers a number of other benefits
 Ease of use: Cube Cloud is easy to set up and use, even for those with no prior experience with data warehousing.
 Cost-effective: Cube Cloud is a cost-effective solution for data warehousing, with a variety of pricing plans to fit your needs.
 Scalability: Cube Cloud can scale to meet the needs of any business, from small to large.
-
+Data model editor with development mode and Rollup Designer: This feature allows you to visually design your data model and create rollups to improve query performance.
+SQL Runner: This feature allows you to run SQL queries against your data warehouse.
+Playground: This feature allows you to experiment with your data and create visualizations.
+Chart Prototyping: This feature allows you to quickly create prototypes of your charts.
+Semantic Layer Sync: This feature keeps your semantic layer in sync with your data model.
+Query History: This feature allows you to view your past queries.
+Pre-aggregations page: This feature allows you to manage your pre-aggregations.
+Performance Insights: This feature provides insights into the performance of your data warehouse.
+Monitoring Integrations: This feature allows you to integrate Cube Cloud with your monitoring tools.
+Access control: This feature allows you to control who has access to your data.
+Audit Log: This feature tracks all changes made to your data warehouse.
+Budgets: This feature allows you to set budgets for your data warehouse usage.
+Preferences: This feature allows you to customize your Cube Cloud experience.
+AI Assistant: This feature provides AI-powered assistance with your data analysis tasks.
 Slide 1: Title Slide
 Title: Cube Semantic Layer Integration: Status & Roadmap
 
