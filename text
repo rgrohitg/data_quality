@@ -1,3 +1,5 @@
+Impact on Accessibility: Both SQL users and applications relying on the Meta API will be unable to access or query data until the error is resolved
+
 Slide 1: Title Slide
 Title: Cube Semantic Layer Integration: Status & Roadmap
 
