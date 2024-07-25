@@ -1,4 +1,15 @@
 Impact on Accessibility: Both SQL users and applications relying on the Meta API will be unable to access or query data until the error is resolved
+Automated scaling: Cube Cloud automatically scales your data warehouse to handle varying workloads and data volumes, eliminating the need for manual intervention.
+High availability: Cube Cloud provides high availability for your data warehouse, ensuring that your data is always accessible.
+Disaster recovery: Cube Cloud offers disaster recovery for your data warehouse, protecting your data from loss or corruption.
+Security: Cube Cloud provides a secure environment for your data warehouse, with features such as access control, encryption, and auditing.
+Monitoring: Cube Cloud provides monitoring for your data warehouse, so you can track its performance and health.
+Support: Cube Cloud provides 24/7 support for your data warehouse.
+In addition to these features, Cube Cloud also offers a number of other benefits, such as:
+
+Ease of use: Cube Cloud is easy to set up and use, even for those with no prior experience with data warehousing.
+Cost-effective: Cube Cloud is a cost-effective solution for data warehousing, with a variety of pricing plans to fit your needs.
+Scalability: Cube Cloud can scale to meet the needs of any business, from small to large.
 
 Slide 1: Title Slide
 Title: Cube Semantic Layer Integration: Status & Roadmap
