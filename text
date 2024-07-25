@@ -1,0 +1,66 @@
+Slide 1: Title Slide
+Title: Cube Semantic Layer Integration: Status & Roadmap
+
+Subtitle: Enhancing Data Analytics on Databricks
+
+[Your Logo/Company Name]
+
+Slide 2: Introduction to Cube Semantic Layer
+Cube Semantic Layer:
+
+Definition: A universal semantic layer that sits between your data sources (like Databricks) and your analytics tools (like ThoughtSpot).
+Benefits:
+Simplifies data modeling and query creation
+Improves query performance through caching and optimization
+Provides centralized governance and access control
+Enables consistent metrics and definitions across tools
+[Image: Simple diagram showing Cube between Databricks and ThoughtSpot]
+
+Slide 3: Current Integration: Cube Open Source & Databricks
+Current Status:
+
+Integration: Cube Open Source is integrated with Databricks.
+Function: Acts as a logical to physical query converter.
+Performance: Query conversion takes ~50ms.
+[Image: More detailed diagram showing Cube converting a logical query to a physical query for Databricks]
+
+Slide 4: Performance Metrics: Query Conversion
+Query Conversion Performance
+
+[Bar Chart or Line Graph]
+
+X-axis: Query Complexity (low, medium, high)
+Y-axis: Conversion Time (milliseconds)
+[Highlight the ~50ms average for typical queries]
+
+Slide 5: Roadmap: Cube Cloud Offerings
+Next Steps:
+
+Explore Cube Cloud:
+Atlas Integration: Deeper integration with Databricks' governance and cataloging tool.
+Databricks Notebook Integration: Enable direct Cube usage within Databricks notebooks.
+Foreign Catalog: Cube added as a foreign catalog in Databricks for easier access.
+[Image: High-level diagram showing Cube Cloud integrating with various Databricks components]
+
+Slide 6: Potential Universal Semantic Layer
+Vision: Universal Semantic Layer
+
+Unified Access: One semantic layer for both ThoughtSpot and Cube Store.
+Benefits:
+Reduced Databricks compute costs due to optimized queries and caching.
+Streamlined data access and governance.
+Enhanced collaboration and consistency across analytics tools.
+[Image: Diagram with Cube as the central layer, connecting Databricks, ThoughtSpot, and Cube Store]
+
+Slide 7: Conclusion & Next Steps
+Key Takeaways:
+
+Cube is successfully integrated with Databricks and shows promising performance.
+Cube Cloud offerings will deepen this integration and expand capabilities.
+The vision of a universal semantic layer has significant potential for cost savings and improved analytics.
+Next Steps:
+
+Evaluate Cube Cloud features and pricing.
+Pilot the universal semantic layer concept to measure its impact.
+Stay informed about Cube's roadmap and future developments.
+Slide 8: Q&A
