@@ -64,3 +64,82 @@ Evaluate Cube Cloud features and pricing.
 Pilot the universal semantic layer concept to measure its impact.
 Stay informed about Cube's roadmap and future developments.
 Slide 8: Q&A
+
+
+
+
+
+
+
+
+
+Slide 3: Current Status of Integration
+Title: Current Status of Integration
+Content:
+
+Cube has been integrated with Databricks.
+Utilized as a logical to physical query converter.
+Performance of Cube's logical to physical conversion is excellent, with no added latency.
+Diagram:
+
+A flowchart showing the integration:
+User Query -> 2. Cube (Logical to Physical Query Conversion) -> 3. Databricks (Execution)
+Slide 4: Performance Metrics
+Title: Performance Metrics
+Content:
+
+The current performance of query conversion.
+Average conversion time: 50ms.
+Diagram:
+
+A performance graph or bar chart showing the query conversion time.
+Slide 5: Pros and Cons of Cube Semantic Layer
+Title: Pros and Cons of Cube Semantic Layer
+Content:
+
+Pros:
+
+Performance: Cube's logical to physical query conversion is efficient and adds no latency.
+Integration: Seamlessly integrates with Databricks for enhanced query execution.
+Scalability: Capable of handling large datasets and complex queries.
+Open Source: Flexible and customizable to meet specific business needs.
+Cons:
+
+Complexity: Initial setup and configuration can be complex.
+Maintenance: Requires ongoing maintenance and updates.
+Compatibility: May face compatibility issues with some data sources or tools.
+Learning Curve: Requires time to learn and fully leverage its capabilities.
+Diagram:
+
+A table or list format displaying the pros and cons side by side.
+Slide 6: Future Roadmap
+Title: Future Roadmap
+Content:
+
+Explore Cube Cloud offerings.
+Atlan integration.
+Databricks notebook integration.
+Plan to add Cube as a foreign catalog in Databricks.
+Diagram:
+
+A timeline diagram showing the planned roadmap and milestones.
+Slide 7: Potential Benefits
+Title: Potential Benefits
+Content:
+
+Universal Semantic Layer for ThoughtSpot and Cube Store.
+Potential reduction in Databricks compute costs.
+Diagram:
+
+A diagram showing the integration of ThoughtSpot and Cube Store with Cube and Databricks.
+Include potential cost savings as annotations.
+Slide 8: Conclusion
+Title: Conclusion
+Content:
+
+Summary of current integration and performance.
+Next steps and future plans.
+Expected benefits and impact.
+Diagram:
+
+Recap diagram summarizing the entire integration process and future roadmap.
