@@ -44,17 +44,22 @@ class CustomSampler(Sampler):
             print("schema:", schema)
 
             # Add check_name to the schema
-            schema.add(T.StructField("check_name", T.StringType(), True))
+            schema = schema.add(T.StructField("check_name", T.StringType(), True))
 
-            # Append check_name to each row and convert floats to Decimal
+            # Convert floats to Decimal for saving to DynamoDB but keep as float for PySpark DataFrame
+            def to_float(value):
+                if isinstance(value, Decimal):
+                    return float(value)
+                return value
+
             check_name = sample_context.check_name
             extended_rows = [
-                tuple(Decimal(value) if isinstance(value, float) else value for value in row) + (check_name,)
+                tuple(to_float(value) for value in row) + (check_name,)
                 for row in rows
             ]
             print("CHECK NAME:", check_name)
 
-            # Create DataFrame
+            # Create DataFrame with PySpark types
             self.retrieved_df = self._spark.createDataFrame(extended_rows, schema)
             self.retrieved_df.show(truncate=False)  # Display DataFrame for debugging
 
@@ -70,3 +75,12 @@ class CustomSampler(Sampler):
 
     def get_failed_rows(self):
         return self.failed_rows
+
+    def convert_for_dynamodb(self):
+        if self.retrieved_df is not None:
+            def convert_row(row):
+                return {k: (Decimal(v) if isinstance(v, float) else v) for k, v in row.items()}
+
+            dynamodb_rows = [convert_row(row) for row in self.failed_rows]
+            return dynamodb_rows
+        return []
