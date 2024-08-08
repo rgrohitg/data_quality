@@ -1,4 +1,16 @@
-Impact on Accessibility: Both SQL users and applications relying on the Meta API will be unable to access or query data until the error is resolved
+As of the latest information available, **ThoughtSpot** does not have a direct, native connector to **Atoti**. ThoughtSpot, a business intelligence and data analytics platform, generally connects to a wide range of data sources like SQL databases, cloud data warehouses, and big data platforms. However, direct support for specialized OLAP (Online Analytical Processing) engines like Atoti may not be built-in.
+
+To connect ThoughtSpot to Atoti, you would typically need an intermediary step:
+
+1. **Expose Atoti Data through a SQL Interface**: If Atoti can expose its data through a SQL interface, ThoughtSpot might be able to connect to it as if it were any other SQL database. This would involve configuring Atoti to use a JDBC/ODBC driver or another SQL-compliant method.
+
+2. **ETL Process**: Another approach could be to use an ETL (Extract, Transform, Load) tool to move or replicate data from Atoti into a data source that ThoughtSpot can natively connect to, such as a cloud data warehouse or relational database.
+
+3. **API or Custom Integration**: If Atoti exposes a REST API or similar, you could potentially build a custom connector or use middleware to bridge the gap between ThoughtSpot and Atoti.
+
+Without direct support, these methods would be necessary to get ThoughtSpot and Atoti to work together.
+
+It's also a good idea to check with ThoughtSpot's and Atoti's support or communities for any updates or third-party solutions that might have emerged.Impact on Accessibility: Both SQL users and applications relying on the Meta API will be unable to access or query data until the error is resolved
 Automated scaling: Cube Cloud automatically scales your data warehouse to handle varying workloads and data volumes, eliminating the need for manual intervention.
 High availability: Cube Cloud provides high availability for your data warehouse, ensuring that your data is always accessible.
 Disaster recovery: Cube Cloud offers disaster recovery for your data warehouse, protecting your data from loss or corruption.
