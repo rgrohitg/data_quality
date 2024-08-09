@@ -1,183 +1,123 @@
-As of the latest information available, **ThoughtSpot** does not have a direct, native connector to **Atoti**. ThoughtSpot, a business intelligence and data analytics platform, generally connects to a wide range of data sources like SQL databases, cloud data warehouses, and big data platforms. However, direct support for specialized OLAP (Online Analytical Processing) engines like Atoti may not be built-in.
+# IAM Policies (Create separate policies for each service)
 
-To connect ThoughtSpot to Atoti, you would typically need an intermediary step:
+resource "aws_iam_policy" "s3_policy" {
+  name        = "S3AccessPolicy"
+  description = "Grants access to S3"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:PutObject" 
+        ],
+        "Resource": [
+          "arn:aws:s3:::your-bucket/*" 
+        ]
+      }
+    ]
+  })
+}
 
-1. **Expose Atoti Data through a SQL Interface**: If Atoti can expose its data through a SQL interface, ThoughtSpot might be able to connect to it as if it were any other SQL database. This would involve configuring Atoti to use a JDBC/ODBC driver or another SQL-compliant method.
+resource "aws_iam_policy" "efs_policy" {
+  name        = "EFSAccessPolicy"
+  description = "Grants access to EFS"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "elasticfilesystem:ClientMount",
+          "elasticfilesystem:ClientWrite"
+        ],
+        "Resource": "arn:aws:elasticfilesystem:<region>:<account-id>:file-system/<file-system-id>"
+      }
+    ]
+  })
+}
 
-2. **ETL Process**: Another approach could be to use an ETL (Extract, Transform, Load) tool to move or replicate data from Atoti into a data source that ThoughtSpot can natively connect to, such as a cloud data warehouse or relational database.
+resource "aws_iam_policy" "dynamodb_policy" {
+  name        = "DynamoDBAccessPolicy"
+  description = "Grants access to DynamoDB"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
+        ],
+        "Resource": "arn:aws:dynamodb:<region>:<account-id>:table/<table-name>"
+      }
+    ]
+  })
+}
 
-3. **API or Custom Integration**: If Atoti exposes a REST API or similar, you could potentially build a custom connector or use middleware to bridge the gap between ThoughtSpot and Atoti.
+resource "aws_iam_policy" "sqs_policy" {
+  name        = "SQSAccessPolicy"
+  description = "Grants access to SQS"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "sqs:SendMessage" 
+        ],
+        "Resource": "arn:aws:sqs:<region>:<account-id>:<queue-name>"
+      }
+    ]
+  })
+}
 
-Without direct support, these methods would be necessary to get ThoughtSpot and Atoti to work together.
+# IAM Role
 
-It's also a good idea to check with ThoughtSpot's and Atoti's support or communities for any updates or third-party solutions that might have emerged.Impact on Accessibility: Both SQL users and applications relying on the Meta API will be unable to access or query data until the error is resolved
-Automated scaling: Cube Cloud automatically scales your data warehouse to handle varying workloads and data volumes, eliminating the need for manual intervention.
-High availability: Cube Cloud provides high availability for your data warehouse, ensuring that your data is always accessible.
-Disaster recovery: Cube Cloud offers disaster recovery for your data warehouse, protecting your data from loss or corruption.
-Security: Cube Cloud provides a secure environment for your data warehouse, with features such as access control, encryption, and auditing.
-Monitoring: Cube Cloud provides monitoring for your data warehouse, so you can track its performance and health.
-Support: Cube Cloud provides 24/7 support for your data warehouse.
-In addition to these features, Cube Cloud also offers a number of other benefits, such as:
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecsTaskRole"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "ecs-tasks.amazonaws.com"
+        },
+        "Effect": "Allow",
+        "Sid": ""
+      }
+    ]
+  })
+}
 
-Ease of use: Cube Cloud is easy to set up and use, even for those with no prior experience with data warehousing.
-Cost-effective: Cube Cloud is a cost-effective solution for data warehousing, with a variety of pricing plans to fit your needs.
-Scalability: Cube Cloud can scale to meet the needs of any business, from small to large.
-Data model editor with development mode and Rollup Designer: This feature allows you to visually design your data model and create rollups to improve query performance.
-SQL Runner: This feature allows you to run SQL queries against your data warehouse.
-Playground: This feature allows you to experiment with your data and create visualizations.
-Chart Prototyping: This feature allows you to quickly create prototypes of your charts.
-Semantic Layer Sync: This feature keeps your semantic layer in sync with your data model.
-Query History: This feature allows you to view your past queries.
-Pre-aggregations page: This feature allows you to manage your pre-aggregations.
-Performance Insights: This feature provides insights into the performance of your data warehouse.
-Monitoring Integrations: This feature allows you to integrate Cube Cloud with your monitoring tools.
-Access control: This feature allows you to control who has access to your data.
-Audit Log: This feature tracks all changes made to your data warehouse.
-Budgets: This feature allows you to set budgets for your data warehouse usage.
-Preferences: This feature allows you to customize your Cube Cloud experience.
-AI Assistant: This feature provides AI-powered assistance with your data analysis tasks.
-Slide 1: Title Slide
-Title: Cube Semantic Layer Integration: Status & Roadmap
+# Attach Policies to the Role
 
-Subtitle: Enhancing Data Analytics on Databricks
+resource "aws_iam_role_policy_attachment" "s3_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.s3_policy.arn
+}
 
-[Your Logo/Company Name]
+resource "aws_iam_role_policy_attachment" "efs_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.efs_policy.arn
+}
 
-Slide 2: Introduction to Cube Semantic Layer
-Cube Semantic Layer:
+resource "aws_iam_role_policy_attachment" "dynamodb_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.dynamodb_policy.arn
+}
 
-Definition: A universal semantic layer that sits between your data sources (like Databricks) and your analytics tools (like ThoughtSpot).
-Benefits:
-Simplifies data modeling and query creation
-Improves query performance through caching and optimization
-Provides centralized governance and access control
-Enables consistent metrics and definitions across tools
-[Image: Simple diagram showing Cube between Databricks and ThoughtSpot]
+resource "aws_iam_role_policy_attachment" "sqs_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.sqs_policy.arn
+}
 
-Slide 3: Current Integration: Cube Open Source & Databricks
-Current Status:
+# ECS Task Definition (Assuming you have other parts of the task definition defined)
 
-Integration: Cube Open Source is integrated with Databricks.
-Function: Acts as a logical to physical query converter.
-Performance: Query conversion takes ~50ms.
-[Image: More detailed diagram showing Cube converting a logical query to a physical query for Databricks]
+resource "aws_ecs_task_definition" "your_task_definition" {
+  # ... other task definition configurations
 
-Slide 4: Performance Metrics: Query Conversion
-Query Conversion Performance
-
-[Bar Chart or Line Graph]
-
-X-axis: Query Complexity (low, medium, high)
-Y-axis: Conversion Time (milliseconds)
-[Highlight the ~50ms average for typical queries]
-
-Slide 5: Roadmap: Cube Cloud Offerings
-Next Steps:
-
-Explore Cube Cloud:
-Atlas Integration: Deeper integration with Databricks' governance and cataloging tool.
-Databricks Notebook Integration: Enable direct Cube usage within Databricks notebooks.
-Foreign Catalog: Cube added as a foreign catalog in Databricks for easier access.
-[Image: High-level diagram showing Cube Cloud integrating with various Databricks components]
-
-Slide 6: Potential Universal Semantic Layer
-Vision: Universal Semantic Layer
-
-Unified Access: One semantic layer for both ThoughtSpot and Cube Store.
-Benefits:
-Reduced Databricks compute costs due to optimized queries and caching.
-Streamlined data access and governance.
-Enhanced collaboration and consistency across analytics tools.
-[Image: Diagram with Cube as the central layer, connecting Databricks, ThoughtSpot, and Cube Store]
-
-Slide 7: Conclusion & Next Steps
-Key Takeaways:
-
-Cube is successfully integrated with Databricks and shows promising performance.
-Cube Cloud offerings will deepen this integration and expand capabilities.
-The vision of a universal semantic layer has significant potential for cost savings and improved analytics.
-Next Steps:
-
-Evaluate Cube Cloud features and pricing.
-Pilot the universal semantic layer concept to measure its impact.
-Stay informed about Cube's roadmap and future developments.
-Slide 8: Q&A
-
-
-
-
-
-
-
-
-
-Slide 3: Current Status of Integration
-Title: Current Status of Integration
-Content:
-
-Cube has been integrated with Databricks.
-Utilized as a logical to physical query converter.
-Performance of Cube's logical to physical conversion is excellent, with no added latency.
-Diagram:
-
-A flowchart showing the integration:
-User Query -> 2. Cube (Logical to Physical Query Conversion) -> 3. Databricks (Execution)
-Slide 4: Performance Metrics
-Title: Performance Metrics
-Content:
-
-The current performance of query conversion.
-Average conversion time: 50ms.
-Diagram:
-
-A performance graph or bar chart showing the query conversion time.
-Slide 5: Pros and Cons of Cube Semantic Layer
-Title: Pros and Cons of Cube Semantic Layer
-Content:
-
-Pros:
-
-Performance: Cube's logical to physical query conversion is efficient and adds no latency.
-Integration: Seamlessly integrates with Databricks for enhanced query execution.
-Scalability: Capable of handling large datasets and complex queries.
-Open Source: Flexible and customizable to meet specific business needs.
-Cons:
-
-Complexity: Initial setup and configuration can be complex.
-Maintenance: Requires ongoing maintenance and updates.
-Compatibility: May face compatibility issues with some data sources or tools.
-Learning Curve: Requires time to learn and fully leverage its capabilities.
-Diagram:
-
-A table or list format displaying the pros and cons side by side.
-Slide 6: Future Roadmap
-Title: Future Roadmap
-Content:
-
-Explore Cube Cloud offerings.
-Atlan integration.
-Databricks notebook integration.
-Plan to add Cube as a foreign catalog in Databricks.
-Diagram:
-
-A timeline diagram showing the planned roadmap and milestones.
-Slide 7: Potential Benefits
-Title: Potential Benefits
-Content:
-
-Universal Semantic Layer for ThoughtSpot and Cube Store.
-Potential reduction in Databricks compute costs.
-Diagram:
-
-A diagram showing the integration of ThoughtSpot and Cube Store with Cube and Databricks.
-Include potential cost savings as annotations.
-Slide 8: Conclusion
-Title: Conclusion
-Content:
-
-Summary of current integration and performance.
-Next steps and future plans.
-Expected benefits and impact.
-Diagram:
-
-Recap diagram summarizing the entire integration process and future roadmap.
+  task_role_arn = aws_iam_role.ecs_task_role.arn
+}
